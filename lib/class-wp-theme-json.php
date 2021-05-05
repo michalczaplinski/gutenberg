@@ -1199,39 +1199,6 @@ class WP_Theme_JSON {
 	}
 
 	/**
-	 * Whether the selector contains a link element.
-	 *
-	 * @param string $selector The selector to check.
-	 *
-	 * @return boolean
-	 */
-	private static function is_link_element( $selector ) {
-		$result = true;
-		if ( false === stripos( $selector, self::ELEMENTS['link'] ) ) {
-			$result = false;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Remove the link selector from the input.
-	 *
-	 * @param string $selector CSS selector to process.
-	 *
-	 * @return string
-	 */
-	private static function without_link_selector( $selector ) {
-		$result = str_ireplace( self::ELEMENTS['link'], '', $selector );
-
-		if ( '' === trim( $result ) ) {
-			return self::ROOT_BLOCK_SELECTOR;
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Removes insecure data from theme.json.
 	 */
 	public function remove_insecure_properties() {

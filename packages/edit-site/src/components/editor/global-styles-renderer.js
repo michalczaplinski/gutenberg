@@ -3,6 +3,7 @@
  */
 import {
 	capitalize,
+	first,
 	forEach,
 	get,
 	isEmpty,
@@ -118,6 +119,9 @@ function getStylesDeclarations( blockStyles = {} ) {
 		STYLE_PROPERTY,
 		( declarations, { value, properties }, key ) => {
 			const pathToValue = value;
+			if ( first( pathToValue ) === 'elements' ) {
+				return declarations;
+			}
 			if ( !! properties ) {
 				properties.forEach( ( prop ) => {
 					if (
@@ -127,9 +131,9 @@ function getStylesDeclarations( blockStyles = {} ) {
 						// for sub-properties that don't have any value.
 						return;
 					}
-					const cssProperty = key.startsWith( '--' )
-						? key
-						: kebabCase( `${ key }${ capitalize( prop ) }` );
+					const cssProperty = kebabCase(
+						`${ key }${ capitalize( prop ) }`
+					);
 					declarations.push(
 						`${ cssProperty }: ${ compileStyleValue(
 							get( blockStyles, [ ...pathToValue, prop ] )
