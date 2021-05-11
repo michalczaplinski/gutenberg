@@ -29,6 +29,7 @@ import {
 import { useInstanceId } from '@wordpress/compose';
 import { search } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
+import { useRef, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -79,6 +80,20 @@ export default function SearchEdit( {
 	const borderRadius = style?.border?.radius;
 	const unitControlInstanceId = useInstanceId( UnitControl );
 	const unitControlInputId = `wp-block-search__width-${ unitControlInstanceId }`;
+	const searchFieldRef = useRef();
+
+	useEffect( () => {
+		if ( 'button-only' !== buttonPosition ) {
+			return;
+		}
+
+		if ( isSelected ) {
+			searchFieldRef.current.style.marginLeft = 0;
+			//console.log( searchFieldRef.current.offsetWidth );
+		} else {
+			searchFieldRef.current.style.marginLeft = `-${ searchFieldRef.current.offsetWidth }px`;
+		}
+	}, [ searchFieldRef ] );
 
 	const getBlockClassNames = () => {
 		return classnames(
@@ -106,7 +121,8 @@ export default function SearchEdit( {
 				: undefined,
 			buttonUseIcon && 'no-button' !== buttonPosition
 				? 'wp-block-search__icon-button'
-				: undefined
+				: undefined,
+			isSelected ? 'wp-block-search__is-selected' : undefined
 		);
 	};
 
@@ -153,6 +169,7 @@ export default function SearchEdit( {
 				onChange={ ( event ) =>
 					setAttributes( { placeholder: event.target.value } )
 				}
+				ref={ searchFieldRef }
 			/>
 		);
 	};
