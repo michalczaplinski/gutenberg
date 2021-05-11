@@ -20,20 +20,16 @@ import {
 	__unstableUseRichText as useRichText,
 	__unstableCreateElement,
 	isEmpty,
-	__unstableIsEmptyLine as isEmptyLine,
 	insert,
-	__unstableInsertLineSeparator as insertLineSeparator,
 	create,
 	replace,
 	split,
 	__UNSTABLE_LINE_SEPARATOR as LINE_SEPARATOR,
 	toHTMLString,
 	slice,
-	isCollapsed,
 } from '@wordpress/rich-text';
 import deprecated from '@wordpress/deprecated';
 import { isURL } from '@wordpress/url';
-import { BACKSPACE, DELETE, ENTER } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -46,6 +42,7 @@ import FormatToolbarContainer from './format-toolbar-container';
 import { store as blockEditorStore } from '../../store';
 import { useUndoAutomaticChange } from './use-undo-automatic-change';
 import { useCaretInFormat } from './use-caret-in-format';
+import { useEnterDeleteHandler } from './use-enter-delete-handler';
 import {
 	addActiveFormats,
 	getMultilineTag,
@@ -436,92 +433,6 @@ function RichTextWrapper(
 
 	useCaretInFormat( hasActiveFormats );
 
-	function onKeyDown( event ) {
-		const { keyCode } = event;
-
-		if ( event.defaultPrevented ) {
-			return;
-		}
-
-		if ( event.keyCode === ENTER ) {
-			event.preventDefault();
-
-			const _value = removeEditorOnlyFormats( value );
-			const canSplit = onReplace && onSplit;
-
-			if ( onReplace ) {
-				const transforms = getBlockTransforms( 'from' ).filter(
-					( { type } ) => type === 'enter'
-				);
-				const transformation = findTransform( transforms, ( item ) => {
-					return item.regExp.test( _value.text );
-				} );
-
-				if ( transformation ) {
-					onReplace( [
-						transformation.transform( {
-							content: _value.text,
-						} ),
-					] );
-					__unstableMarkAutomaticChange();
-				}
-			}
-
-			if ( multiline ) {
-				if ( event.shiftKey ) {
-					if ( ! disableLineBreaks ) {
-						onChange( insert( _value, '\n' ) );
-					}
-				} else if ( canSplit && isEmptyLine( _value ) ) {
-					splitValue( _value );
-				} else {
-					onChange( insertLineSeparator( _value ) );
-				}
-			} else {
-				const { text, start, end } = _value;
-				const canSplitAtEnd =
-					onSplitAtEnd && start === end && end === text.length;
-
-				if ( event.shiftKey || ( ! canSplit && ! canSplitAtEnd ) ) {
-					if ( ! disableLineBreaks ) {
-						onChange( insert( _value, '\n' ) );
-					}
-				} else if ( ! canSplit && canSplitAtEnd ) {
-					onSplitAtEnd();
-				} else if ( canSplit ) {
-					splitValue( _value );
-				}
-			}
-		} else if ( keyCode === DELETE || keyCode === BACKSPACE ) {
-			const { start, end, text } = value;
-			const isReverse = keyCode === BACKSPACE;
-
-			// Only process delete if the key press occurs at an uncollapsed edge.
-			if (
-				! isCollapsed( value ) ||
-				hasActiveFormats ||
-				( isReverse && start !== 0 ) ||
-				( ! isReverse && end !== text.length )
-			) {
-				return;
-			}
-
-			if ( onMerge ) {
-				onMerge( ! isReverse );
-			}
-
-			// Only handle remove on Backspace. This serves dual-purpose of being
-			// an intentional user interaction distinguishing between Backspace and
-			// Delete to remove the empty field, but also to avoid merge & remove
-			// causing destruction of two fields (merge, then removed merged).
-			if ( onRemove && isEmpty( value ) && isReverse ) {
-				onRemove( ! isReverse );
-			}
-
-			event.preventDefault();
-		}
-	}
-
 	const TagName = tagName;
 	const content = (
 		<>
@@ -547,6 +458,21 @@ function RichTextWrapper(
 					props.ref,
 					richTextRef,
 					useUndoAutomaticChange(),
+					useEnterDeleteHandler( {
+						removeEditorOnlyFormats,
+						value,
+						onReplace,
+						onSplit,
+						__unstableMarkAutomaticChange,
+						multiline,
+						onChange,
+						disableLineBreaks,
+						splitValue,
+						onSplitAtEnd,
+						hasActiveFormats,
+						onMerge,
+						onRemove,
+					} ),
 					anchorRef,
 					forwardedRef,
 				] ) }
@@ -559,10 +485,6 @@ function RichTextWrapper(
 					'rich-text'
 				) }
 				onFocus={ unstableOnFocus }
-				onKeyDown={ ( event ) => {
-					autocompleteProps.onKeyDown( event );
-					onKeyDown( event );
-				} }
 			/>
 		</>
 	);
