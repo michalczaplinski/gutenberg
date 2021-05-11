@@ -107,12 +107,18 @@ function createNavigationBlock( menuItems ) {
 }
 
 export function mapMenuItemsToBlocks( menuItems ) {
+	if ( ! menuItems ) {
+		return null;
+	}
 	const itemsByParentID = groupBy( menuItems, 'parent' );
 	const menuItemIdToClientId = {};
 	const menuItemsToTreeOfBlocks = ( items ) => {
 		const innerBlocks = [];
 		if ( ! items ) {
-			return;
+			return {
+				innerBlocks,
+				menuItemIdToClientId,
+			};
 		}
 
 		const sortedItems = sortBy( items, 'menu_order' );

@@ -357,7 +357,7 @@ describe( 'converting menu items to blocks', () => {
 	} );
 
 	it( 'returns an empty array when menu items argument is an empty array', () => {
-		const actual = mapMenuItemsToBlocks( [] );
+		const { innerBlocks: actual } = mapMenuItemsToBlocks( [] );
 		expect( actual ).toEqual( [] );
 	} );
 } );
