@@ -52,6 +52,8 @@ import {
 // Used to calculate border radius adjustment to avoid "fat" corners when
 // button is placed inside wrapper.
 const DEFAULT_INNER_PADDING = 4;
+const BUTTON_BEHAVIOR_EXPAND = 'expand-searchfield';
+const BUTTON_BEHAVIOR_LINK = 'search-page-link';
 
 export default function SearchEdit( {
 	className,
@@ -93,6 +95,12 @@ export default function SearchEdit( {
 			'button-only' === buttonPosition
 				? 'wp-block-search__button-only'
 				: undefined,
+			BUTTON_BEHAVIOR_EXPAND === buttonBehavior
+				? 'wp-block-search__button-behavior-expand'
+				: undefined,
+			BUTTON_BEHAVIOR_LINK === buttonBehavior
+				? 'wp-block-search__button-behavior-link'
+				: undefined,
 			! buttonUseIcon && 'no-button' !== buttonPosition
 				? 'wp-block-search__text-button'
 				: undefined,
@@ -116,7 +124,10 @@ export default function SearchEdit( {
 	};
 
 	const getResizableSides = () => {
-		if ( 'button-only' === buttonPosition ) {
+		if (
+			'button-only' === buttonPosition &&
+			'search-page-link' === buttonBehavior
+		) {
 			return {};
 		}
 
@@ -270,11 +281,11 @@ export default function SearchEdit( {
 							}
 							options={ [
 								{
-									value: 'expand-searchfield',
+									value: BUTTON_BEHAVIOR_EXPAND,
 									label: __( 'Show and expand search field' ),
 								},
 								{
-									value: 'search-page-link',
+									value: BUTTON_BEHAVIOR_LINK,
 									label: __( 'Navigate to search page' ),
 								},
 								//{ value: 'search-modal', 'label': __( 'Show search modal') },
@@ -403,13 +414,17 @@ export default function SearchEdit( {
 			>
 				{ ( 'button-inside' === buttonPosition ||
 					'button-outside' === buttonPosition ||
-					'button-only' === buttonPosition ) && (
+					( 'button-only' === buttonPosition &&
+						BUTTON_BEHAVIOR_LINK !== buttonBehavior ) ) && (
 					<>
 						{ renderTextField() }
 						{ renderButton() }
 					</>
 				) }
 
+				{ 'button-only' === buttonPosition &&
+					BUTTON_BEHAVIOR_LINK === buttonBehavior &&
+					renderButton() }
 				{ 'no-button' === buttonPosition && renderTextField() }
 			</ResizableBox>
 		</div>
