@@ -93,6 +93,20 @@ const persistPost = ( post ) =>
  * @return {Object} Navigation block
  */
 function createNavigationBlock( menuItems ) {
+	const { innerBlocks, menuItemIdToClientId } = mapMenuItemsToBlocks(
+		menuItems
+	);
+	const navigationBlock = createBlock(
+		'core/navigation',
+		{
+			orientation: 'vertical',
+		},
+		innerBlocks
+	);
+	return [ navigationBlock, menuItemIdToClientId ];
+}
+
+export function mapMenuItemsToBlocks( menuItems ) {
 	const itemsByParentID = groupBy( menuItems, 'parent' );
 	const menuItemIdToClientId = {};
 	const menuItemsToTreeOfBlocks = ( items ) => {
@@ -119,14 +133,7 @@ function createNavigationBlock( menuItems ) {
 
 	// menuItemsToTreeOfBlocks takes an array of top-level menu items and recursively creates all their innerBlocks
 	const innerBlocks = menuItemsToTreeOfBlocks( itemsByParentID[ 0 ] || [] );
-	const navigationBlock = createBlock(
-		'core/navigation',
-		{
-			orientation: 'vertical',
-		},
-		innerBlocks
-	);
-	return [ navigationBlock, menuItemIdToClientId ];
+	return { innerBlocks, menuItemIdToClientId };
 }
 
 function convertMenuItemToBlock( menuItem, innerBlocks = [] ) {
