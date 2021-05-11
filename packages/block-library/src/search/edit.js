@@ -24,6 +24,7 @@ import {
 	ResizableBox,
 	PanelBody,
 	BaseControl,
+	SelectControl,
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { search } from '@wordpress/icons';
@@ -69,6 +70,7 @@ export default function SearchEdit( {
 		buttonText,
 		buttonPosition,
 		buttonUseIcon,
+		buttonBehavior,
 		style,
 	} = attributes;
 
@@ -259,6 +261,27 @@ export default function SearchEdit( {
 
 			<InspectorControls>
 				<PanelBody title={ __( 'Display Settings' ) }>
+					{ 'button-only' === buttonPosition && (
+						<SelectControl
+							label={ __( 'On button click' ) }
+							value={ buttonBehavior }
+							onChange={ ( behavior ) =>
+								setAttributes( { buttonBehavior: behavior } )
+							}
+							options={ [
+								{
+									value: 'expand-searchfield',
+									label: __( 'Show and expand search field' ),
+								},
+								{
+									value: 'search-page-link',
+									label: __( 'Navigate to search page' ),
+								},
+								//{ value: 'search-modal', 'label': __( 'Show search modal') },
+							] }
+						/>
+					) }
+
 					<BaseControl
 						label={ __( 'Width' ) }
 						id={ unitControlInputId }
@@ -379,14 +402,14 @@ export default function SearchEdit( {
 				showHandle={ isSelected }
 			>
 				{ ( 'button-inside' === buttonPosition ||
-					'button-outside' === buttonPosition ) && (
+					'button-outside' === buttonPosition ||
+					'button-only' === buttonPosition ) && (
 					<>
 						{ renderTextField() }
 						{ renderButton() }
 					</>
 				) }
 
-				{ 'button-only' === buttonPosition && renderButton() }
 				{ 'no-button' === buttonPosition && renderTextField() }
 			</ResizableBox>
 		</div>
