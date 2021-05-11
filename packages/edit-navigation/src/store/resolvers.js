@@ -96,6 +96,7 @@ function createNavigationBlock( menuItems ) {
 	const { innerBlocks, menuItemIdToClientId } = mapMenuItemsToBlocks(
 		menuItems
 	);
+
 	const navigationBlock = createBlock(
 		'core/navigation',
 		{
@@ -114,13 +115,6 @@ export function mapMenuItemsToBlocks( menuItems ) {
 	const menuItemIdToClientId = {};
 	const menuItemsToTreeOfBlocks = ( items ) => {
 		const innerBlocks = [];
-		if ( ! items ) {
-			return {
-				innerBlocks,
-				menuItemIdToClientId,
-			};
-		}
-
 		const sortedItems = sortBy( items, 'menu_order' );
 
 		for ( const item of sortedItems ) {
